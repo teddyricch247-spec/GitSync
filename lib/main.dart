@@ -19,7 +19,6 @@ import 'package:GitSync/ui/dialog/info_dialog.dart' as InfoDialog;
 import 'package:GitSync/ui/dialog/merge_conflict.dart' as MergeConflictDialog;
 import 'package:GitSync/ui/dialog/rename_remote.dart' as RenameRemoteDialog;
 import 'package:GitSync/ui/page/file_explorer.dart';
-import 'package:GitSync/ui/page/ai_features_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:GitSync/providers/riverpod_providers.dart';
 import 'package:GitSync/ui/component/provider_builder.dart';
@@ -2216,23 +2215,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
                   }
                 },
                 children: [
-                  if (aiEnabled)
-                    _KeepAlivePage(
-                      child: ValueListenableBuilder(
-                        valueListenable: _tabIndex,
-                        builder: (context, currentTab, child) => PopScope(
-                          canPop: currentTab != 0,
-                          onPopInvokedWithResult: (didPop, _) {
-                            if (!didPop) {
-                              _tabIndex.value = 1;
-                              _pageController.animateToPage(1, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-                            }
-                          },
-                          child: child!,
-                        ),
-                        child: AiFeaturesPage(),
-                      ),
-                    ),
                   _KeepAlivePage(
                     child: ValueListenableBuilder(
                       valueListenable: _homeCanPop,
@@ -4348,12 +4330,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
                         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                         height: 64,
                         destinations: [
-                          if (aiEnabled)
-                            NavigationDestination(
-                              icon: FaIcon(FontAwesomeIcons.wandMagicSparkles, color: colours.secondaryLight, size: textLG),
-                              selectedIcon: FaIcon(FontAwesomeIcons.wandMagicSparkles, color: colours.tertiaryInfo, size: textLG),
-                              label: t.tabChat,
-                            ),
                           NavigationDestination(
                             icon: FaIcon(FontAwesomeIcons.codeBranch, color: colours.secondaryLight, size: textLG),
                             selectedIcon: FaIcon(FontAwesomeIcons.codeBranch, color: colours.tertiaryInfo, size: textLG),

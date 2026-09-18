@@ -1,0 +1,54 @@
+workflows:
+  android-release:
+    name: GitSync Android Release
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      android_signing:
+        - gitsync_keystore
+      flutter: 3.35.2
+      vars:
+        NDK_VERSION: "27.2.12479018"
+    scripts:
+      - name: Set up secrets.dart (blank OAuth values — PAT/SSH login still works)
+        script: |
+          cp lib/constant/secrets.dart.template lib/constant/secrets.dart
+
+      - name: Install Rust toolchain
+        script: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.88.0
+          echo "export PATH=\"$HOME/.cargo/bin:\$PATH\"" >> $CM_ENV
+
+      - name: Install flutter_rust_bridge_codegen and cargo-expand
+        script: |
+          source $HOME/.cargo/env
+          cargo install flutter_rust_bridge_codegen --version 2.12.0 --locked
+          cargo install cargo-expand --version 1.0.121 --locked
+
+      - name: Install Android NDK
+        script: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "ndk;$NDK_VERSION"
+          echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/$NDK_VERSION" >> $CM_ENV
+
+      - name: Get Flutter packages
+        script: flutter pub get
+
+      - name: Generate Rust bridge bindings
+        script: |
+          source $HOME/.cargo/env
+          flutter_rust_bridge_codegen generate
+          git checkout HEAD -- rust/src/frb_generated.rs
+
+      - name: Build signed release APK
+        script: |
+          source $HOME/.cargo/env
+          flutter build apk --release
+
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
